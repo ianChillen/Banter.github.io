@@ -1,0 +1,1039 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Gatherly – Groupbuys, Experiences & Deals AI</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <!-- Tailwind CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    :root {
+      --bg: #fdf8ff;
+      --card: #ffffff;
+      --accent: #eb5cff;
+      --accent-soft: rgba(235, 92, 255, 0.1);
+      --accent-2: #6366f1;
+      --accent-2-soft: rgba(99, 102, 241, 0.12);
+      --text-main: #16161d;
+      --text-muted: #6b7280;
+      --pinterest-col-gap: 1.1rem;
+    }
+
+    html, body {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      background: radial-gradient(circle at top left, #ffe8ff 0, #fdf8ff 40%, #e7f0ff 100%);
+      color: var(--text-main);
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", sans-serif;
+    }
+
+    /* Soft glassy navbar */
+    .nav-glass {
+      backdrop-filter: blur(18px);
+      background: rgba(255, 255, 255, 0.92);
+      box-shadow: 0 18px 40px rgba(15, 23, 42, 0.10);
+      border-radius: 9999px;
+      border: 1px solid rgba(148, 163, 184, 0.18);
+    }
+
+    .primary-btn {
+      background: linear-gradient(135deg, #ff7ee5, #7366ff);
+      color: white;
+      box-shadow: 0 14px 35px rgba(124, 58, 237, 0.40);
+    }
+
+    .primary-btn:hover {
+      filter: brightness(1.05);
+      transform: translateY(-1px);
+    }
+
+    .soft-btn {
+      background: rgba(255, 255, 255, 0.9);
+      border: 1px solid rgba(148, 163, 184, 0.35);
+    }
+
+    .soft-card {
+      background: rgba(255, 255, 255, 0.92);
+      border-radius: 26px;
+      box-shadow: 0 18px 40px rgba(15, 23, 42, 0.09);
+      border: 1px solid rgba(148, 163, 184, 0.16);
+    }
+
+    .pill {
+      border-radius: 9999px;
+      box-shadow: 0 12px 32px rgba(15, 23, 42, 0.10);
+    }
+
+    .gradient-text {
+      background: linear-gradient(135deg, #ff7ee5 0%, #6366f1 40%, #22c1c3 100%);
+      -webkit-background-clip: text;
+      color: transparent;
+    }
+
+    .fade-border {
+      position: relative;
+    }
+    .fade-border::before {
+      content: "";
+      position: absolute;
+      inset: -1px;
+      border-radius: inherit;
+      background: linear-gradient(130deg, rgba(236, 72, 153, 0.4), rgba(79, 70, 229, 0.3), rgba(34, 197, 235, 0.4));
+      z-index: -1;
+      opacity: 0.9;
+    }
+
+    /* Pinterest layout */
+    .pin-grid {
+      column-count: 3;
+      column-gap: var(--pinterest-col-gap);
+    }
+    .pin-card {
+      break-inside: avoid;
+      margin-bottom: var(--pinterest-col-gap);
+      border-radius: 24px;
+      overflow: hidden;
+      background: var(--card);
+      box-shadow: 0 14px 32px rgba(15, 23, 42, 0.14);
+      border: 1px solid rgba(148, 163, 184, 0.22);
+      transition: transform 0.18s ease, box-shadow 0.18s ease, translate 0.18s ease;
+    }
+    .pin-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 18px 40px rgba(15, 23, 42, 0.22);
+    }
+
+    @media (max-width: 1024px) {
+      .pin-grid { column-count: 2; }
+    }
+    @media (max-width: 640px) {
+      .pin-grid { column-count: 1; }
+    }
+
+    /* Smooth section reveal */
+    .reveal {
+      opacity: 0;
+      transform: translateY(24px);
+      transition: opacity 0.6s ease, transform 0.6s ease;
+    }
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* FAQ accordion */
+    .faq-item {
+      border-radius: 20px;
+      border: 1px solid rgba(148, 163, 184, 0.3);
+      background: rgba(255, 255, 255, 0.95);
+      box-shadow: 0 14px 30px rgba(15, 23, 42, 0.06);
+    }
+
+    /* Chips */
+    .soft-chip {
+      border-radius: 9999px;
+      background: rgba(148, 163, 184, 0.10);
+      border: 1px solid rgba(148, 163, 184, 0.35);
+      font-size: 0.72rem;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+    }
+
+    /* Tabs underline */
+    .tab-active {
+      color: #111827;
+    }
+    .tab-active::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      bottom: -6px;
+      width: 100%;
+      height: 2px;
+      border-radius: 9999px;
+      background: linear-gradient(90deg, #fb7185, #6366f1);
+    }
+  </style>
+</head>
+<body class="min-h-screen text-slate-900">
+  <!-- Navbar -->
+  <header class="sticky top-0 z-40">
+    <div class="max-w-6xl mx-auto px-4 pt-4 pb-3">
+      <div class="nav-glass flex items-center justify-between px-5 py-3">
+        <div class="flex items-center gap-2">
+          <div class="w-8 h-8 rounded-2xl bg-gradient-to-br from-pink-400 via-indigo-400 to-teal-300 flex items-center justify-center text-xs font-semibold text-white shadow-lg">
+            G
+          </div>
+          <div class="flex flex-col leading-tight">
+            <span class="font-semibold text-sm tracking-tight">Gatherly</span>
+            <span class="text-[0.65rem] text-slate-500 uppercase tracking-[0.18em]">Groupbuys & Experiences</span>
+          </div>
+        </div>
+        <nav class="hidden md:flex items-center gap-6 text-xs text-slate-600">
+          <a href="#how-it-works" class="hover:text-slate-900 transition">How it works</a>
+          <a href="#groupbuys" class="hover:text-slate-900 transition">Groupbuys</a>
+          <a href="#deals-ai" class="hover:text-slate-900 transition">Deals AI</a>
+          <a href="#communities" class="hover:text-slate-900 transition">Communities</a>
+          <a href="#creators" class="hover:text-slate-900 transition">Creators</a>
+          <a href="#faq" class="hover:text-slate-900 transition">FAQ</a>
+        </nav>
+        <div class="hidden md:flex items-center gap-3 text-xs">
+          <button onclick="document.getElementById('waitlist').scrollIntoView({behavior:'smooth'})" class="soft-btn px-3.5 py-1.5 rounded-full text-slate-700 font-medium flex items-center gap-1">
+            Log in
+          </button>
+          <button onclick="document.getElementById('waitlist').scrollIntoView({behavior:'smooth'})" class="primary-btn px-4 py-1.5 rounded-full font-medium text-xs">
+            Join waitlist
+          </button>
+        </div>
+        <button class="md:hidden soft-btn rounded-full w-9 h-9 flex items-center justify-center">
+          <span class="w-4 h-[1.5px] bg-slate-800 block mb-[3px] rounded-full"></span>
+          <span class="w-4 h-[1.5px] bg-slate-800 block rounded-full"></span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero -->
+  <main class="pb-24">
+    <section class="max-w-6xl mx-auto px-4 mt-6 lg:mt-10 grid lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1.1fr)] gap-10 items-start">
+      <div class="space-y-6 reveal">
+        <div class="inline-flex items-center gap-2 px-3 py-1 pill bg-white/90 border border-slate-200 text-[0.65rem] text-slate-600 mb-1">
+          <span class="w-5 h-5 rounded-full bg-gradient-to-br from-pink-400 to-indigo-500 flex items-center justify-center text-[0.6rem] text-white">★</span>
+          <span class="font-semibold tracking-[0.18em] uppercase">Soft launch · Invite-only</span>
+        </div>
+        <h1 class="text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight leading-tight">
+          Groupbuy anything.<br />
+          <span class="gradient-text">Travel, events, and the little extras.</span>
+        </h1>
+        <p class="text-sm sm:text-base text-slate-600 max-w-xl">
+          Gatherly lets friends, fans, and creators run
+          groupbuys and experiences together—from Vegas F1 weekends
+          to Seoul cafe hopping—while our Deals AI quietly finds
+          flights, stays, eSIMs, outfits, and more in a Pinterest-style feed.
+        </p>
+
+        <div class="flex flex-col sm:flex-row gap-3 sm:items-center">
+          <button onclick="document.getElementById('waitlist').scrollIntoView({behavior:'smooth'})" class="primary-btn px-4 sm:px-6 py-2 rounded-full text-xs sm:text-sm font-semibold flex items-center justify-center gap-2">
+            Join the waitlist
+            <span class="inline-flex items-center justify-center rounded-full bg-white/20 text-[0.6rem] px-2 py-[2px]">
+              2-min sign up
+            </span>
+          </button>
+          <button onclick="document.getElementById('groupbuys').scrollIntoView({behavior:'smooth'})" class="soft-btn px-4 sm:px-5 py-2 rounded-full text-xs sm:text-sm text-slate-800 font-medium flex items-center justify-center gap-2">
+            Explore how it works
+            <span class="text-base">↗</span>
+          </button>
+        </div>
+
+        <div class="flex flex-wrap gap-3 items-center pt-2">
+          <div class="flex -space-x-2">
+            <div class="w-7 h-7 rounded-full bg-gradient-to-tr from-pink-300 to-amber-200 border border-white"></div>
+            <div class="w-7 h-7 rounded-full bg-gradient-to-tr from-violet-300 to-cyan-200 border border-white"></div>
+            <div class="w-7 h-7 rounded-full bg-gradient-to-tr from-sky-300 to-pink-200 border border-white flex items-center justify-center text-[0.6rem] text-slate-700 font-semibold">
+              +42
+            </div>
+          </div>
+          <p class="text-[0.74rem] text-slate-500">
+            Friends are already planning:
+            <span class="font-medium text-slate-700">Vegas F1 · Seoul cafes · Miami road trips</span>
+          </p>
+        </div>
+      </div>
+
+      <!-- Hero Pinterest board -->
+      <div class="reveal">
+        <div class="soft-card p-3 sm:p-4 fade-border relative">
+          <div class="absolute -top-4 left-4 px-3 py-1 rounded-full bg-white/90 border border-slate-200 shadow-sm flex items-center gap-2 text-[0.65rem] text-slate-600">
+            <span class="w-4 h-4 rounded-full bg-green-400/90"></span>
+            Live groupbuys this week
+          </div>
+
+          <div class="mt-3 grid grid-cols-[1.15fr,0.95fr] gap-2 sm:gap-3">
+            <!-- Left stack -->
+            <div class="space-y-2 sm:space-y-3">
+              <!-- Vegas F1 -->
+              <article class="pin-card !mb-0 overflow-hidden">
+                <div class="relative h-40 sm:h-44 bg-gradient-to-br from-slate-900 via-slate-800 to-purple-900 flex items-end p-3">
+                  <div class="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(248,250,252,0.12),transparent_55%)]"></div>
+                  <div class="absolute top-3 left-3 px-2 py-[3px] text-[0.6rem] rounded-full bg-black/40 text-slate-100 flex items-center gap-1">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> 7/10 joined
+                  </div>
+                  <div class="absolute top-3 right-3 px-2 py-[3px] text-[0.65rem] rounded-full bg-pink-500/80 text-white">
+                    -12% group deal
+                  </div>
+                  <div class="relative text-white">
+                    <h3 class="font-semibold text-sm sm:text-base mb-1">Vegas F1 Weekend</h3>
+                    <p class="text-[0.7rem] sm:text-[0.75rem] text-slate-100/80">3 nights on-strip · track views · shared villa</p>
+                  </div>
+                </div>
+                <div class="px-3.5 py-3">
+                  <div class="flex items-center justify-between mb-1.5">
+                    <span class="text-[0.7rem] text-slate-500 uppercase tracking-[0.16em]">Groupbuy</span>
+                    <span class="text-[0.7rem] text-emerald-600 font-medium">10 people → 10% off</span>
+                  </div>
+                  <div class="flex items-center justify-between">
+                    <div class="flex -space-x-1">
+                      <div class="w-5 h-5 rounded-full bg-slate-200 border border-white"></div>
+                      <div class="w-5 h-5 rounded-full bg-slate-300 border border-white"></div>
+                      <div class="w-5 h-5 rounded-full bg-slate-400 border border-white flex items-center justify-center text-[0.55rem] text-white">
+                        +4
+                      </div>
+                    </div>
+                    <button class="text-[0.7rem] px-2.5 py-1 rounded-full bg-slate-900 text-white font-medium">
+                      Join waitlist
+                    </button>
+                  </div>
+                </div>
+              </article>
+
+              <!-- Deals AI preview -->
+              <article class="pin-card !mb-0 overflow-hidden">
+                <div class="px-3.5 pt-3 pb-2 flex items-center justify-between">
+                  <div class="flex items-center gap-2">
+                    <div class="w-7 h-7 rounded-full bg-gradient-to-tr from-sky-400 to-indigo-500 flex items-center justify-center text-[0.7rem] text-white">
+                      AI
+                    </div>
+                    <div>
+                      <p class="text-[0.75rem] text-slate-500 uppercase tracking-[0.16em]">Deals AI</p>
+                      <p class="text-xs text-slate-800 font-medium">Planning Vegas for 4</p>
+                    </div>
+                  </div>
+                  <span class="text-[0.65rem] text-slate-400">Pinterest view</span>
+                </div>
+                <div class="grid grid-cols-3 gap-1.5 p-2 pt-1 pb-3">
+                  <div class="rounded-2xl bg-gradient-to-br from-violet-200 via-indigo-300 to-slate-900 p-2 flex flex-col justify-between text-white min-h-[92px]">
+                    <div class="text-[0.65rem]">Flights</div>
+                    <div class="text-[0.7rem] font-semibold leading-tight">NYC → LAS</div>
+                    <div class="flex justify-between items-end mt-1.5">
+                      <span class="text-[0.7rem] bg-white/15 px-1.5 py-[2px] rounded-full">$312 avg</span>
+                      <span class="text-[0.6rem] text-emerald-100">+3 alt</span>
+                    </div>
+                  </div>
+                  <div class="rounded-2xl bg-gradient-to-br from-amber-100 via-rose-100 to-rose-200 p-2 flex flex-col justify-between min-h-[92px]">
+                    <div class="text-[0.6rem] text-rose-700/70">Stay</div>
+                    <div class="text-[0.7rem] font-semibold text-rose-900 leading-tight">Strip hotel</div>
+                    <div class="text-[0.65rem] text-rose-700">3 nights · shared</div>
+                  </div>
+                  <div class="rounded-2xl bg-gradient-to-br from-sky-50 via-sky-100 to-sky-200 p-2 flex flex-col justify-between min-h-[92px]">
+                    <div class="text-[0.6rem] text-sky-700/70">Secondaries</div>
+                    <div class="text-[0.7rem] font-semibold text-sky-900 leading-tight">eSIM · pool passes · brunch</div>
+                  </div>
+                </div>
+              </article>
+            </div>
+
+            <!-- Right stack -->
+            <div class="space-y-2 sm:space-y-3">
+              <!-- Seoul cafes curated -->
+              <article class="pin-card !mb-0 overflow-hidden">
+                <div class="relative h-32 sm:h-36 bg-gradient-to-br from-pink-200 via-rose-100 to-slate-50 flex items-end">
+                  <div class="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(244,114,182,0.35),transparent_52%)]"></div>
+                  <div class="absolute top-2 left-2 px-2 py-[3px] text-[0.6rem] rounded-full bg-white/80 text-rose-700 flex items-center gap-1">
+                    Curated by
+                    <span class="font-semibold">Kieun Choi</span>
+                  </div>
+                  <div class="absolute bottom-2 left-3">
+                    <h3 class="font-semibold text-sm text-slate-900">Seoul cafe hopping</h3>
+                    <p class="text-[0.7rem] text-slate-600">Soft pastel itinerary · 6 spots</p>
+                  </div>
+                  <div class="absolute bottom-2 right-3 px-2 py-[3px] rounded-full bg-rose-500 text-white text-[0.65rem]">
+                    Experiences
+                  </div>
+                </div>
+                <div class="px-3.5 py-3 flex items-center justify-between">
+                  <div>
+                    <p class="text-[0.7rem] text-slate-500">From ₩29,000 / person</p>
+                    <p class="text-[0.7rem] text-slate-500">Groupbuy coffee flights & merch</p>
+                  </div>
+                  <button class="text-[0.7rem] px-2.5 py-1 rounded-full bg-slate-100 text-slate-800 font-medium">
+                    See flow
+                  </button>
+                </div>
+              </article>
+
+              <!-- Communities card -->
+              <article class="pin-card !mb-0 overflow-hidden">
+                <div class="px-3.5 py-3">
+                  <div class="flex items-center justify-between mb-2">
+                    <span class="text-[0.7rem] text-slate-500 uppercase tracking-[0.16em]">Communities</span>
+                    <span class="text-[0.7rem] text-slate-400">Like soft Reddit for trips</span>
+                  </div>
+                  <div class="flex flex-wrap gap-1.5">
+                    <span class="soft-chip px-2.5 py-1 text-slate-700">/r/vegas-weekenders</span>
+                    <span class="soft-chip px-2.5 py-1 text-slate-700">/r/miami-roads</span>
+                    <span class="soft-chip px-2.5 py-1 text-slate-700">/r/seoul-sips</span>
+                    <span class="soft-chip px-2.5 py-1 text-slate-700">/r/digital-nomads</span>
+                    <span class="soft-chip px-2.5 py-1 text-slate-700">+ more</span>
+                  </div>
+                  <div class="mt-2.5 text-[0.75rem] text-slate-600">
+                    Join micro-communities where members co-create groupbuys, post itineraries, and share hidden deals discovered by Deals AI.
+                  </div>
+                </div>
+              </article>
+
+              <!-- Quick stats -->
+              <article class="pin-card !mb-0 overflow-hidden">
+                <div class="px-3.5 py-3 flex items-center justify-between">
+                  <div>
+                    <p class="text-[0.7rem] text-slate-500 uppercase tracking-[0.16em]">Avg savings</p>
+                    <p class="text-lg font-semibold text-emerald-600">12–18%</p>
+                  </div>
+                  <div>
+                    <p class="text-[0.7rem] text-slate-500 uppercase tracking-[0.16em]">Time saved</p>
+                    <p class="text-lg font-semibold text-indigo-600">3–5 hrs</p>
+                  </div>
+                  <div>
+                    <p class="text-[0.7rem] text-slate-500 uppercase tracking-[0.16em]">Group size</p>
+                    <p class="text-lg font-semibold text-pink-500">10 / group</p>
+                  </div>
+                </div>
+              </article>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- How it works -->
+    <section id="how-it-works" class="max-w-5xl mx-auto px-4 mt-20 space-y-8 reveal">
+      <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+        <div>
+          <p class="text-[0.75rem] text-slate-500 uppercase tracking-[0.18em] mb-1">How Gatherly fits together</p>
+          <h2 class="text-xl sm:text-2xl font-semibold tracking-tight">Groupbuys, events, and Deals AI in one soft space</h2>
+        </div>
+        <div class="flex flex-wrap gap-2 text-[0.7rem]">
+          <span class="soft-chip px-2.5 py-1 text-slate-700">For trip planners</span>
+          <span class="soft-chip px-2.5 py-1 text-slate-700">For creators</span>
+          <span class="soft-chip px-2.5 py-1 text-slate-700">For merchants</span>
+        </div>
+      </div>
+      <div class="grid md:grid-cols-3 gap-4">
+        <div class="soft-card p-4">
+          <div class="w-8 h-8 rounded-2xl bg-gradient-to-br from-fuchsia-400 to-pink-500 flex items-center justify-center text-xs text-white mb-3 shadow-lg">
+            1
+          </div>
+          <h3 class="font-semibold text-sm mb-1.5">Start with a group idea</h3>
+          <p class="text-xs text-slate-600 mb-3">
+            Create a groupbuy or event: "Vegas F1 weekend", "Roadtrip to Miami", or "Seoul cafe crawl".
+          </p>
+          <ul class="text-xs text-slate-600 space-y-1.5">
+            <li>• Set min/max people and discounts (e.g. 10/10 → -10%)</li>
+            <li>• Invite friends or publish into communities</li>
+            <li>• Let creators or merchants co-host</li>
+          </ul>
+        </div>
+        <div class="soft-card p-4">
+          <div class="w-8 h-8 rounded-2xl bg-gradient-to-br from-indigo-400 to-sky-500 flex items-center justify-center text-xs text-white mb-3 shadow-lg">
+            2
+          </div>
+          <h3 class="font-semibold text-sm mb-1.5">Deals AI fills the board</h3>
+          <p class="text-xs text-slate-600 mb-3">
+            Ask for specifics and secondaries—flights, stays, outfits, eSIMs—and get a Pinterest-like board of options.
+          </p>
+          <ul class="text-xs text-slate-600 space-y-1.5">
+            <li>• Swipe through curated cards instead of long lists</li>
+            <li>• One tap to share into your group</li>
+            <li>• AI remembers constraints and vibes</li>
+          </ul>
+        </div>
+        <div class="soft-card p-4">
+          <div class="w-8 h-8 rounded-2xl bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center text-xs text-white mb-3 shadow-lg">
+            3
+          </div>
+          <h3 class="font-semibold text-sm mb-1.5">Lock in & go</h3>
+          <p class="text-xs text-slate-600 mb-3">
+            As your group fills, discounts unlock automatically. Merchants get a single, clean order; you get simple per-person pricing.
+          </p>
+          <ul class="text-xs text-slate-600 space-y-1.5">
+            <li>• Transparent countdown to unlock tiers</li>
+            <li>• Split payments and add-ons handled for you</li>
+            <li>• Chat, polls, and updates inside each group</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- Groupbuys section -->
+    <section id="groupbuys" class="max-w-6xl mx-auto px-4 mt-20 space-y-8 reveal">
+      <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+        <div>
+          <p class="text-[0.75rem] text-slate-500 uppercase tracking-[0.18em] mb-1">Groupbuys & experiences</p>
+          <h2 class="text-xl sm:text-2xl font-semibold tracking-tight">From "10 people + 10%" to once-in-a-lifetime trips</h2>
+        </div>
+        <button onclick="document.getElementById('waitlist').scrollIntoView({behavior:'smooth'})" class="soft-btn px-3.5 py-1.5 rounded-full text-[0.7rem] text-slate-800 font-medium">
+          Start a groupbuy
+        </button>
+      </div>
+
+      <div class="grid lg:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)] gap-6 items-start">
+        <!-- Pinterest-style examples -->
+        <div class="pin-grid">
+          <!-- Tile 1 -->
+          <article class="pin-card">
+            <div class="relative h-40 bg-gradient-to-br from-slate-900 via-slate-800 to-rose-700 flex items-end p-3">
+              <div class="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(248,250,252,0.18),transparent_55%)]"></div>
+              <div class="absolute top-3 left-3 px-2 py-[3px] rounded-full bg-black/40 text-[0.6rem] text-slate-100 flex items-center gap-1">
+                10 / 10 filled
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+              </div>
+              <div class="absolute top-3 right-3 px-2 py-[3px] rounded-full bg-emerald-500 text-white text-[0.65rem]">
+                -10% unlocked
+              </div>
+              <div class="text-white">
+                <h3 class="font-semibold text-sm mb-1">Vegas F1 villa takeover</h3>
+                <p class="text-[0.75rem] text-slate-100/80">4 rooms · shared pool · transfers included</p>
+              </div>
+            </div>
+            <div class="px-3.5 py-3 space-y-2">
+              <div class="flex items-center justify-between">
+                <span class="text-[0.7rem] text-slate-500 uppercase tracking-[0.14em]">Private friends groupbuy</span>
+                <span class="text-[0.8rem] font-semibold text-slate-900">$742 / person</span>
+              </div>
+              <div class="flex items-center justify-between text-[0.7rem] text-slate-600">
+                <span>Early bird: first 5 get free eSIM</span>
+                <button class="px-2.5 py-1 rounded-full bg-slate-100 text-slate-800">Copy flow</button>
+              </div>
+            </div>
+          </article>
+
+          <!-- Tile 2 -->
+          <article class="pin-card">
+            <div class="relative h-48 bg-gradient-to-br from-sky-200 via-emerald-100 to-amber-100 flex items-end p-3">
+              <div class="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(56,189,248,0.35),transparent_55%)]"></div>
+              <div class="absolute top-3 left-3 px-2 py-[3px] rounded-full bg-white/80 text-[0.6rem] text-emerald-700">
+                Creator event
+              </div>
+              <div class="text-slate-900">
+                <h3 class="font-semibold text-sm mb-1">Roadtrip to Miami</h3>
+                <p class="text-[0.75rem] text-slate-700">Convertible convoy · 3-day content trip</p>
+              </div>
+            </div>
+            <div class="px-3.5 py-3 space-y-2">
+              <div class="text-[0.7rem] text-slate-600">
+                Secondary groupbuys:
+                <span class="font-medium">beachwear, beach packs, film cameras</span>.
+              </div>
+              <div class="flex items-center justify-between">
+                <span class="text-[0.7rem] text-slate-500">15 spots · 2 tiers of discounts</span>
+                <button class="text-[0.7rem] px-2.5 py-1 rounded-full bg-slate-900 text-white">Join waitlist</button>
+              </div>
+            </div>
+          </article>
+
+          <!-- Tile 3 -->
+          <article class="pin-card">
+            <div class="relative h-40 bg-gradient-to-br from-rose-200 via-rose-100 to-slate-50 flex items-end p-3">
+              <div class="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(244,114,182,0.45),transparent_55%)]"></div>
+              <div class="absolute top-3 left-3 px-2 py-[3px] rounded-full bg-white/80 text-[0.6rem] text-rose-700">
+                Curated by Kieun Choi
+              </div>
+              <div class="text-slate-900">
+                <h3 class="font-semibold text-sm mb-1">Seoul cafe merch drop</h3>
+                <p class="text-[0.75rem] text-slate-700">Cafe hopping + limited collab mugs and tote</p>
+              </div>
+            </div>
+            <div class="px-3.5 py-3 space-y-2">
+              <div class="flex items-center justify-between">
+                <span class="text-[0.7rem] text-slate-500">30 orders → -18% on bundle</span>
+                <span class="text-[0.7rem] text-rose-600 font-medium">Creator revenue share built-in</span>
+              </div>
+              <div class="text-[0.7rem] text-slate-600">
+                Group chat gets route, photo prompts, and cafe-only freebies.
+              </div>
+            </div>
+          </article>
+        </div>
+
+        <!-- Explainer -->
+        <div class="space-y-4">
+          <div class="soft-card p-4">
+            <h3 class="font-semibold text-sm mb-2">A groupbuy engine that speaks in vibes</h3>
+            <p class="text-xs text-slate-600 mb-3">
+              Most groupbuy tools feel like spreadsheets. Gatherly feels like a cozy Pinterest board:
+              visual, easy to skim, and centered around how a trip or drop feels—not just price.
+            </p>
+            <ul class="text-xs text-slate-600 space-y-2">
+              <li>• Set target: “10/10 people → 10% off · 20/20 → 18% off”</li>
+              <li>• Allow friends to add their own secondary groupbuys (e.g. matching fits, props, extra nights)</li>
+              <li>• Keep it private or discoverable in communities</li>
+            </ul>
+          </div>
+
+          <div class="soft-card p-4 bg-gradient-to-br from-indigo-50 to-pink-50">
+            <div class="flex items-center justify-between mb-2">
+              <p class="text-[0.75rem] text-slate-700 font-medium">Waitlist overview</p>
+              <span class="text-[0.65rem] text-slate-500">zero obligation</span>
+            </div>
+            <p class="text-xs text-slate-600 mb-3">
+              Join now to get early access and help shape our first merchant, creator, and community tools.
+            </p>
+            <div class="flex flex-wrap gap-2 text-[0.7rem]">
+              <span class="soft-chip px-2.5 py-1 text-slate-700">Trip planners</span>
+              <span class="soft-chip px-2.5 py-1 text-slate-700">Creators</span>
+              <span class="soft-chip px-2.5 py-1 text-slate-700">Travel brands</span>
+              <span class="soft-chip px-2.5 py-1 text-slate-700">Local cafes & merchants</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Deals AI -->
+    <section id="deals-ai" class="max-w-6xl mx-auto px-4 mt-20 space-y-8 reveal">
+      <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+        <div>
+          <p class="text-[0.75rem] text-slate-500 uppercase tracking-[0.18em] mb-1">Deals AI</p>
+          <h2 class="text-xl sm:text-2xl font-semibold tracking-tight">Tell it the trip. It fills your Pinterest board.</h2>
+        </div>
+        <div class="flex gap-2 text-[0.7rem]">
+          <button class="soft-btn px-3 py-1.5 rounded-full text-slate-800 font-medium">Try a sample prompt</button>
+        </div>
+      </div>
+
+      <div class="grid lg:grid-cols-2 gap-6 items-start">
+        <!-- Prompt + explanation -->
+        <div class="soft-card p-4 space-y-4">
+          <div class="text-[0.75rem] text-slate-600">
+            Example prompt:
+          </div>
+          <div class="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-[0.75rem] text-slate-800">
+            “Planning a Vegas trip for F1 weekend for 4 friends from NYC.
+            Find flights, a fun but not chaotic hotel, eSIMs, and a pool party.
+            Keep it under $900 / person.”
+          </div>
+
+          <div class="grid grid-cols-2 gap-3 text-xs text-slate-600">
+            <div class="space-y-1.5">
+              <p class="font-semibold text-slate-800">What Deals AI does</p>
+              <ul class="space-y-1.5">
+                <li>• Turns your prompt into cards for flights, stays, experiences, and secondaries</li>
+                <li>• Surfaces bundles and stackable discounts</li>
+                <li>• Saves your preferences (window seat, hotels with good Wi‑Fi, etc.)</li>
+              </ul>
+            </div>
+            <div class="space-y-1.5">
+              <p class="font-semibold text-slate-800">Secondaries made easy</p>
+              <ul class="space-y-1.5">
+                <li>• For Vegas: eSIMs, outfits, pool passes, airport transfers</li>
+                <li>• For Miami roadtrip: beachwear, beach packs, cooler rentals, playlists</li>
+                <li>• For Seoul cafes: outfit inspo, film, transport cards</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- Pinterest board UI -->
+        <div class="soft-card p-3">
+          <div class="flex items-center justify-between mb-3">
+            <div class="flex items-center gap-2">
+              <div class="w-8 h-8 rounded-2xl bg-gradient-to-br from-sky-400 to-indigo-500 flex items-center justify-center text-xs text-white">
+                AI
+              </div>
+              <div class="text-xs">
+                <p class="font-medium text-slate-800">Deals AI · Vegas F1</p>
+                <p class="text-slate-500">Pinterest-style results board</p>
+              </div>
+            </div>
+            <div class="flex gap-1.5">
+              <span class="soft-chip px-2 py-[3px] text-slate-700">Flights</span>
+              <span class="soft-chip px-2 py-[3px] text-slate-700">Stays</span>
+              <span class="soft-chip px-2 py-[3px] text-slate-700">Secondaries</span>
+            </div>
+          </div>
+          <div class="pin-grid">
+            <!-- Flights card -->
+            <article class="pin-card">
+              <div class="h-28 bg-gradient-to-br from-slate-900 via-slate-800 to-indigo-700 flex flex-col justify-between p-3 text-white">
+                <div class="flex justify-between text-[0.7rem]">
+                  <span>NYC → LAS</span>
+                  <span class="bg-white/15 px-1.5 py-[2px] rounded-full">$312</span>
+                </div>
+                <div class="text-[0.8rem] font-semibold">Evening arrival · 1 stop · carry-on only</div>
+                <div class="flex justify-between items-end text-[0.65rem] text-slate-100/80">
+                  <span>Best balance of time & savings</span>
+                  <span>+3 alternatives</span>
+                </div>
+              </div>
+              <div class="px-3.5 py-3 text-[0.7rem] text-slate-600 flex justify-between items-center">
+                <span>Add to groupbuy</span>
+                <button class="px-2.5 py-1 rounded-full bg-slate-900 text-white">Pin</button>
+              </div>
+            </article>
+
+            <!-- Hotel card -->
+            <article class="pin-card">
+              <div class="h-32 bg-gradient-to-br from-violet-200 via-slate-100 to-slate-900 flex flex-col justify-between p-3">
+                <div class="flex justify-between text-[0.7rem] text-slate-900">
+                  <span>Calm-but-fun strip hotel</span>
+                  <span class="bg-white/70 px-1.5 py-[2px] rounded-full text-[0.65rem] text-slate-800">$428 / 3 nights</span>
+                </div>
+                <div class="text-[0.75rem] text-slate-800">
+                  8.9 rating · pool · walkable to circuit
+                </div>
+                <div class="text-[0.65rem] text-slate-600 flex justify-between">
+                  <span>+ free late checkout</span>
+                  <span>Creator recommended</span>
+                </div>
+              </div>
+              <div class="px-3.5 py-3 text-[0.7rem] text-slate-600">
+                Bundle with flights & pool passes for up to -14%.
+              </div>
+            </article>
+
+            <!-- eSIM + secondaries card -->
+            <article class="pin-card">
+              <div class="h-28 bg-gradient-to-br from-sky-50 via-sky-100 to-sky-200 p-3 flex flex-col justify-between">
+                <div class="flex items-center justify-between text-[0.7rem] text-sky-900">
+                  <span>Weekend eSIM pack</span>
+                  <span class="bg-white/80 px-1.5 py-[2px] rounded-full text-[0.65rem]">4 lines</span>
+                </div>
+                <div class="text-[0.75rem] text-sky-900">
+                  Includes 10GB LTE, hotspot, and a backup QR if anyone’s phone glitches.
+                </div>
+                <div class="text-[0.65rem] text-sky-800 flex justify-between">
+                  <span>Auto-send install steps to group chat</span>
+                  <span>-8% with flights</span>
+                </div>
+              </div>
+              <div class="px-3.5 py-3 text-[0.7rem] text-slate-600">
+                Deals AI chains “secondaries” so you don’t forget the little things.
+              </div>
+            </article>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Communities -->
+    <section id="communities" class="max-w-6xl mx-auto px-4 mt-20 space-y-8 reveal">
+      <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+        <div>
+          <p class="text-[0.75rem] text-slate-500 uppercase tracking-[0.18em] mb-1">Communities</p>
+          <h2 class="text-xl sm:text-2xl font-semibold tracking-tight">Soft spaces where groupbuys, events, and ideas live</h2>
+        </div>
+        <button onclick="document.getElementById('waitlist').scrollIntoView({behavior:'smooth'})" class="soft-btn px-3.5 py-1.5 rounded-full text-[0.7rem] text-slate-800 font-medium">
+          Reserve your username
+        </button>
+      </div>
+
+      <div class="grid md:grid-cols-[minmax(0,1.1fr)_minmax(0,1.2fr)] gap-6 items-start">
+        <!-- Community explainer -->
+        <div class="soft-card p-4 space-y-3">
+          <p class="text-xs text-slate-600">
+            Communities on Gatherly feel like soft, themed Reddit groups.
+            Each one has:
+          </p>
+          <ul class="text-xs text-slate-600 space-y-2">
+            <li>• A Pinterest-style board of active groupbuys and upcoming events</li>
+            <li>• Posts, polls, and threads to plan together</li>
+            <li>• Highlights from Deals AI that match the community’s vibe</li>
+          </ul>
+          <p class="text-xs text-slate-600">
+            Think:
+            <span class="font-medium">/vegas-weekenders, /seoul-cafe-kids, /miami-roads, /digital-nomads, /cozy-couples-trips</span>.
+          </p>
+        </div>
+
+        <!-- Community board -->
+        <div class="soft-card p-3">
+          <div class="flex items-center justify-between mb-3">
+            <div class="flex items-center gap-2">
+              <div class="w-8 h-8 rounded-2xl bg-gradient-to-br from-rose-300 to-amber-200 flex items-center justify-center text-xs text-slate-900">
+                /seoul-sips
+              </div>
+              <div class="text-xs">
+                <p class="font-medium text-slate-800">Seoul Cafe Kids</p>
+                <p class="text-slate-500">Pastel cafes · soft outfits · analog cameras</p>
+              </div>
+            </div>
+            <button class="soft-btn px-3 py-1.5 rounded-full text-[0.7rem] text-slate-800 font-medium">
+              Join community
+            </button>
+          </div>
+          <div class="pin-grid">
+            <article class="pin-card">
+              <div class="h-32 bg-gradient-to-br from-rose-200 via-rose-100 to-slate-50 p-3 flex flex-col justify-between">
+                <div class="text-[0.65rem] text-rose-700">Pinned groupbuy</div>
+                <div>
+                  <p class="text-xs font-semibold text-slate-900">Saturday Seoul cafe crawl</p>
+                  <p class="text-[0.7rem] text-slate-600">10 spots · includes 3 signature drinks & film roll</p>
+                </div>
+                <div class="flex justify-between items-center text-[0.7rem] text-slate-700">
+                  <span>7 / 10 joined · -10% at 10</span>
+                  <button class="px-2.5 py-1 rounded-full bg-slate-900 text-white text-[0.7rem]">Join</button>
+                </div>
+              </div>
+            </article>
+
+            <article class="pin-card">
+              <div class="h-32 bg-gradient-to-br from-slate-900 via-slate-800 to-violet-700 p-3 flex flex-col justify-between text-white">
+                <div class="flex justify-between text-[0.65rem]">
+                  <span>Community Deals AI</span>
+                  <span class="bg-white/10 px-1.5 py-[2px] rounded-full">4 new picks</span>
+                </div>
+                <div class="text-[0.8rem] font-semibold">
+                  Best latte art + window light cafes this week
+                </div>
+                <div class="text-[0.7rem] text-slate-100/80">
+                  Cards for set menus, photo corners, and nearby thrift stores.
+                </div>
+              </div>
+            </article>
+
+            <article class="pin-card">
+              <div class="h-32 bg-gradient-to-br from-indigo-50 via-slate-50 to-pink-50 p-3 flex flex-col justify-between">
+                <div class="text-[0.65rem] text-slate-500">Thread · 38 replies</div>
+                <div>
+                  <p class="text-xs font-semibold text-slate-900">“Show us your cafe fits”</p>
+                  <p class="text-[0.7rem] text-slate-600">Top looks turned into a groupbuy capsule drop.</p>
+                </div>
+                <div class="text-[0.7rem] text-slate-600">+ Creator collab announce tomorrow</div>
+              </div>
+            </article>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Creator & Merchant tabs -->
+    <section id="creators" class="max-w-6xl mx-auto px-4 mt-20 space-y-8 reveal">
+      <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+        <div>
+          <p class="text-[0.75rem] text-slate-500 uppercase tracking-[0.18em] mb-1">For partners</p>
+          <h2 class="text-xl sm:text-2xl font-semibold tracking-tight">Made for creators and merchants too</h2>
+        </div>
+        <div class="flex gap-2 text-[0.7rem]">
+          <button onclick="setPartnerTab('creator')" id="tab-creator" class="relative soft-btn px-3.5 py-1.5 rounded-full text-slate-800 font-medium">
+            Creators
+          </button>
+          <button onclick="setPartnerTab('merchant')" id="tab-merchant" class="relative px-3.5 py-1.5 rounded-full text-slate-500 font-medium border border-transparent">
+            Merchants
+          </button>
+        </div>
+      </div>
+
+      <div id="creator-panel" class="grid md:grid-cols-2 gap-6">
+        <div class="soft-card p-4 space-y-3">
+          <h3 class="font-semibold text-sm">Creator explainer</h3>
+          <p class="text-xs text-slate-600">
+            Turn your ideas into monetized boards—without spreadsheets, manual DMs, or scattered links.
+          </p>
+          <ul class="text-xs text-slate-600 space-y-2">
+            <li>• Host group trips, cafe crawls, or drop days with built‑in groupbuy tiers</li>
+            <li>• Add your own curated Deals AI prompts and pin your favorite results</li>
+            <li>• Earn automatically with transparent splits and dashboards</li>
+          </ul>
+          <p class="text-xs text-slate-600">
+            Example: “Kieun Choi · Seoul cafe hopping” becomes a visual board with dates,
+            signups, merch add‑ons, and AI‑suggested secondaries.
+          </p>
+        </div>
+        <div class="soft-card p-4 bg-gradient-to-br from-rose-50 to-indigo-50">
+          <p class="text-[0.75rem] text-slate-800 font-medium mb-1">Creator perks</p>
+          <ul class="text-xs text-slate-600 space-y-2">
+            <li>• One link for everything: event details, groupbuy tiers, add‑ons, Q&A</li>
+            <li>• Soft‑styled boards that feel like your brand, not ours</li>
+            <li>• Built‑in waitlists and early‑bird drops</li>
+          </ul>
+          <button onclick="document.getElementById('waitlist').scrollIntoView({behavior:'smooth'})" class="primary-btn mt-3 px-4 py-2 rounded-full text-xs font-semibold">
+            Join creator waitlist
+          </button>
+        </div>
+      </div>
+
+      <div id="merchant-panel" class="grid md:grid-cols-2 gap-6 hidden">
+        <div class="soft-card p-4 space-y-3">
+          <h3 class="font-semibold text-sm">Merchant explainer</h3>
+          <p class="text-xs text-slate-600">
+            Plug into group demand without gambling on discounts. You decide the tiers; Gatherly brings the groups.
+          </p>
+          <ul class="text-xs text-slate-600 space-y-2">
+            <li>• Set “10 people → 10% off · 25 people → 18% off” and cap at what works for you</li>
+            <li>• Receive a single consolidated order instead of 50 DMs</li>
+            <li>• Feature in creator boards and community Deals AI suggestions</li>
+          </ul>
+          <p class="text-xs text-slate-600">
+            Perfect for boutique hotels, cafes, experiences, merch brands, and local tour operators.
+          </p>
+        </div>
+        <div class="soft-card p-4 bg-gradient-to-br from-emerald-50 to-sky-50">
+          <p class="text-[0.75rem] text-slate-800 font-medium mb-1">Merchant tools</p>
+          <ul class="text-xs text-slate-600 space-y-2">
+            <li>• Clean dashboard for dates, max capacity, and pricing tiers</li>
+            <li>• Insights into what Deals AI is generating around your niche</li>
+            <li>• Creator co‑host tools and rev‑share presets</li>
+          </ul>
+          <button onclick="document.getElementById('waitlist').scrollIntoView({behavior:'smooth'})" class="primary-btn mt-3 px-4 py-2 rounded-full text-xs font-semibold">
+            Join merchant waitlist
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Waitlist & FAQ -->
+    <section id="waitlist" class="max-w-6xl mx-auto px-4 mt-20 grid lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1.1fr)] gap-8 items-start reveal">
+      <!-- Waitlist form -->
+      <div class="soft-card p-5">
+        <h2 class="text-xl font-semibold tracking-tight mb-1">Join the Gatherly waitlist</h2>
+        <p class="text-xs text-slate-600 mb-4">
+          Be first in line for early access, creator tools, and merchant onboarding. We’ll keep it low‑noise and high‑signal.
+        </p>
+        <form class="space-y-3" onsubmit="event.preventDefault(); showWaitlistToast();">
+          <div class="grid sm:grid-cols-2 gap-3">
+            <div>
+              <label class="block text-[0.7rem] text-slate-500 mb-1">Name</label>
+              <input type="text" required class="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white text-xs focus:outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100" placeholder="Alex Kim" />
+            </div>
+            <div>
+              <label class="block text-[0.7rem] text-slate-500 mb-1">Email</label>
+              <input type="email" required class="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white text-xs focus:outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100" placeholder="you@example.com" />
+            </div>
+          </div>
+          <div>
+            <label class="block text-[0.7rem] text-slate-500 mb-1">How do you plan to use Gatherly?</label>
+            <select class="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white text-xs focus:outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100">
+              <option>Planning trips with friends</option>
+              <option>Hosting events as a creator</option>
+              <option>Offering group deals as a merchant</option>
+              <option>Building / moderating communities</option>
+              <option>Just curious</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-[0.7rem] text-slate-500 mb-1">What’s your dream first groupbuy?</label>
+            <textarea rows="3" class="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white text-xs focus:outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100" placeholder="Vegas F1 villa, Seoul cafe crawl, Miami roadtrip..."></textarea>
+          </div>
+          <button type="submit" class="primary-btn w-full py-2 rounded-full text-xs font-semibold mt-1">
+            Join waitlist
+          </button>
+          <p class="text-[0.65rem] text-slate-500 text-center">
+            No spam. Occasional product updates and early beta invites.
+          </p>
+        </form>
+      </div>
+
+      <!-- FAQ -->
+      <div id="faq" class="space-y-4">
+        <h2 class="text-xl font-semibold tracking-tight">FAQ</h2>
+        <div class="faq-item p-4">
+          <button type="button" class="w-full flex items-center justify-between text-left" onclick="toggleFaq(this)">
+            <span class="text-xs font-medium text-slate-800">Is Gatherly for trips, events, or shopping?</span>
+            <span class="text-lg leading-none text-slate-500">+</span>
+          </button>
+          <div class="mt-2 hidden text-[0.75rem] text-slate-600">
+            Gatherly is for all three—because in real life they blend together. You can host a trip, an IRL event, or a pure product groupbuy. Deals AI takes your context and surfaces both the main thing and all the secondaries that usually get forgotten.
+          </div>
+        </div>
+        <div class="faq-item p-4">
+          <button type="button" class="w-full flex items-center justify-between text-left" onclick="toggleFaq(this)">
+            <span class="text-xs font-medium text-slate-800">How do groupbuy discounts actually work?</span>
+            <span class="text-lg leading-none text-slate-500">+</span>
+          </button>
+          <div class="mt-2 hidden text-[0.75rem] text-slate-600">
+            Each groupbuy has tiers, like “10 people → 10% off · 20 people → 18% off.” When your group hits a tier, everyone’s pricing updates automatically. Merchants and creators define their own tiers and caps; Gatherly just makes it easy and transparent.
+          </div>
+        </div>
+        <div class="faq-item p-4">
+          <button type="button" class="w-full flex items-center justify-between text-left" onclick="toggleFaq(this)">
+            <span class="text-xs font-medium text-slate-800">What makes Deals AI different from normal search?</span>
+            <span class="text-lg leading-none text-slate-500">+</span>
+          </button>
+          <div class="mt-2 hidden text-[0.75rem] text-slate-600">
+            Instead of endless lists, Deals AI fills a Pinterest-style board with clear cards—flights, stays, outfits, add-ons—anchored to your budget, preferences, and vibe. You can pin, remix, and share into group chats in one tap.
+          </div>
+        </div>
+        <div class="faq-item p-4">
+          <button type="button" class="w-full flex items-center justify-between text-left" onclick="toggleFaq(this)">
+            <span class="text-xs font-medium text-slate-800">Can merchants and creators trust the payouts?</span>
+            <span class="text-lg leading-none text-slate-500">+</span>
+          </button>
+          <div class="mt-2 hidden text-[0.75rem] text-slate-600">
+            Yes. Our merchant and creator dashboards show real-time counts, revenue splits, and payout timelines. Funds are held securely until groupbuy conditions are met, then released based on agreed splits and schedules.
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Toast -->
+  <div id="toast" class="fixed bottom-4 left-1/2 -translate-x-1/2 px-4 py-2 rounded-full bg-slate-900 text-white text-xs shadow-xl opacity-0 pointer-events-none transition-opacity duration-300">
+    You’re on the waitlist. We’ll be in touch soon ✨
+  </div>
+
+  <script>
+    // Intersection observer for reveal animations
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.15 });
+
+    document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+    // FAQ accordion
+    function toggleFaq(buttonEl) {
+      const answer = buttonEl.nextElementSibling;
+      const isOpen = !answer.classList.contains('hidden');
+      const parent = buttonEl.parentElement.parentElement;
+
+      // Close other FAQs inside same column
+      parent.querySelectorAll('.faq-item > div.mt-2').forEach(div => {
+        if (div !== answer) {
+          div.classList.add('hidden');
+          const btn = div.previousElementSibling;
+          if (btn && btn.lastElementChild) btn.lastElementChild.textContent = '+';
+        }
+      });
+
+      if (isOpen) {
+        answer.classList.add('hidden');
+        buttonEl.lastElementChild.textContent = '+';
+      } else {
+        answer.classList.remove('hidden');
+        buttonEl.lastElementChild.textContent = '–';
+      }
+    }
+
+    // Partner tabs
+    function setPartnerTab(tab) {
+      const creatorPanel = document.getElementById('creator-panel');
+      const merchantPanel = document.getElementById('merchant-panel');
+      const creatorTab = document.getElementById('tab-creator');
+      const merchantTab = document.getElementById('tab-merchant');
+
+      if (tab === 'creator') {
+        creatorPanel.classList.remove('hidden');
+        merchantPanel.classList.add('hidden');
+        creatorTab.classList.add('soft-btn', 'tab-active');
+        merchantTab.classList.remove('soft-btn', 'tab-active');
+        merchantTab.classList.add('border', 'border-transparent', 'text-slate-500');
+      } else {
+        merchantPanel.classList.remove('hidden');
+        creatorPanel.classList.add('hidden');
+        merchantTab.classList.add('soft-btn', 'tab-active');
+        creatorTab.classList.remove('soft-btn', 'tab-active');
+        creatorTab.classList.add('border', 'border-transparent', 'text-slate-500');
+      }
+    }
+
+    // Waitlist toast
+    function showWaitlistToast() {
+      const toast = document.getElementById('toast');
+      toast.classList.remove('opacity-0', 'pointer-events-none');
+      toast.classList.add('opacity-100');
+      setTimeout(() => {
+        toast.classList.add('opacity-0');
+        toast.classList.remove('opacity-100');
+        setTimeout(() => {
+          toast.classList.add('pointer-events-none');
+        }, 300);
+      }, 2600);
+    }
+  </script>
+</body>
+</html>
